@@ -13,7 +13,10 @@ import com.engine.graphics.Renderer;
 import com.engine.graphics.Shader;
 import com.engine.graphics.Texture;
 import com.engine.graphics.TextureRegion;
+import com.engine.world.AnimatedSprite;
+import com.engine.world.Animation;
 import com.engine.world.Sprite;
+import com.engine.world.SpriteSheet;
 import com.engine.world.TileMap;
 import com.engine.world.TileRegistry;
 import com.engine.world.Tileset;
@@ -27,6 +30,8 @@ public class Main {
     Camera camera;
     List<Sprite> listaSprites;
     private FpsCounter fpsCounter;
+    private long lastTime;
+    AnimatedSprite player;
 
     public void inicializarOpenGL() {
 
@@ -43,20 +48,33 @@ public class Main {
         GLFW.glfwMakeContextCurrent(window);
 
         GL.createCapabilities();
-        //VSync OFF
+        // VSync OFF
         GLFW.glfwSwapInterval(0);
     }
 
     public void iniciarLoop() {
+
+        lastTime = System.nanoTime();
+
         while (!GLFW.glfwWindowShouldClose(window)) {
+
+            long currentTime = System.nanoTime();
+
+            float deltaTime = (currentTime - lastTime) / 1_000_000_000f;
+
+            lastTime = currentTime;
+
             fpsCounter.update();
-            
+
+            // update para animaciones ira por aca en un futuro y las fisicas etc
+            player.update(deltaTime);
+
             GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
             renderer.draw(
-                    tileMap, tileRegistry,listaSprites);
+                    tileMap, tileRegistry, listaSprites);
             camera.setPosition(
                     camera.getX(),
-                    camera.getY()+0.1f);
+                    camera.getY());
             GLFW.glfwSwapBuffers(window);
             GLFW.glfwPollEvents();
         }
@@ -64,9 +82,50 @@ public class Main {
 
     public void inicializarRecursos() {
 
-        fpsCounter=new FpsCounter();
+        fpsCounter = new FpsCounter();
 
+        incializarGraficos();
+        inicializarMundo();
+        inicializarSprites();
 
+    }
+
+    public void inicializarSprites() {
+        Texture cat = new Texture(
+                "/textures/Animal/Cat 01-1.png");
+
+        SpriteSheet playerSheet=new SpriteSheet(cat, 32, 32);
+        TextureRegion[] frames = { playerSheet.getFrame(0 ,0),playerSheet.getFrame(1 , 0),playerSheet.getFrame(2 , 0) };
+        Animation animation=new Animation(frames, 0.5f);
+        
+        player = new AnimatedSprite(
+                animation,
+                100,
+                100);
+
+        listaSprites = new ArrayList<>();
+        listaSprites.add(player);
+
+    }
+
+    public void inicializarMundo() {
+
+        Texture texture = new Texture(
+                "/textures/tileset.png");
+
+        tileRegistry = new TileRegistry();
+
+        Tileset tileset = new Tileset(texture, 32, 32);
+        tileRegistry.register(0, tileset.getTile(0, 3));
+        tileRegistry.register(1, tileset.getTile(1, 0));
+        tileRegistry.register(2, tileset.getTile(2, 0));
+        tileRegistry.register(3, tileset.getTile(10, 0));
+
+        tileMap = new TileMap();
+
+    }
+
+    public void incializarGraficos() {
         Shader shader = new Shader(
                 "/shaders/vertex.glsl",
                 "/shaders/fragment.glsl");
@@ -76,39 +135,8 @@ public class Main {
         shader.use();
         shader.setUniform("textureSampler", 0);
 
-        Texture texture = new Texture(
-                "/textures/tileset.png");
-
-                 Texture texture2 = new Texture(
-                "/textures/prueba.png");
-        TextureRegion playerRegion = new TextureRegion(
-                texture2,
-                0,
-                0,
-                32,
-                32);
-
-        Sprite player = new Sprite(
-                playerRegion,
-                100,
-                100);
-
-        listaSprites = new ArrayList<>();
-        listaSprites.add(player);
-        tileRegistry = new TileRegistry();
-
-        camera = new Camera(0, 0,800,600);
+        camera = new Camera(0, 0, 800, 600);
         renderer = new Renderer(shader, 800, 600, camera);
-
-        Tileset tileset = new Tileset(texture, 32, 32);
-
-        tileRegistry.register(0, tileset.getTile(0, 3));
-        tileRegistry.register(1, tileset.getTile(1, 0));
-        tileRegistry.register(2, tileset.getTile(2, 0));
-        tileRegistry.register(3, tileset.getTile(10, 0));
-
-        tileMap = new TileMap();
-
     }
 
     public void cerrar() {
