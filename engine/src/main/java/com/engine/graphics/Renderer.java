@@ -34,15 +34,16 @@ public class Renderer {
         public void draw(TileMap tileMap, TileRegistry registry, List<Sprite> lista) {
 
                 batch.clear();
-
+//culling
                 Tile firstTile = registry.get(tileMap.getId(0, 0));
                 int tileWidth = firstTile.getRegion().getWidth();
                 int tileHeight = firstTile.getRegion().getHeight();
 
                 int startX = (int) (camera.getX() / tileWidth);
                 int startY = (int) (camera.getY() / tileHeight);
-                int endX = (int) Math.ceil((camera.getX() + screenWidth) / tileWidth);
-                int endY = (int) Math.ceil((camera.getY() + screenHeight) / tileHeight);
+                
+                int endX = (int) Math.ceil((camera.getX() + camera.getWidth()) / tileWidth);
+                int endY = (int) Math.ceil((camera.getY() + camera.getHeight()) / tileHeight);
 
                 startX = Math.max(0, startX);
                 startY = Math.max(0, startY);

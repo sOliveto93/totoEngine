@@ -7,6 +7,7 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 
+import com.engine.debug.FpsCounter;
 import com.engine.graphics.Camera;
 import com.engine.graphics.Renderer;
 import com.engine.graphics.Shader;
@@ -25,6 +26,7 @@ public class Main {
     private TileRegistry tileRegistry;
     Camera camera;
     List<Sprite> listaSprites;
+    private FpsCounter fpsCounter;
 
     public void inicializarOpenGL() {
 
@@ -41,22 +43,29 @@ public class Main {
         GLFW.glfwMakeContextCurrent(window);
 
         GL.createCapabilities();
+        //VSync OFF
+        GLFW.glfwSwapInterval(0);
     }
 
     public void iniciarLoop() {
         while (!GLFW.glfwWindowShouldClose(window)) {
+            fpsCounter.update();
+            
             GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
             renderer.draw(
                     tileMap, tileRegistry,listaSprites);
-            /*camera.setPosition(
-                    camera.getX()+1,
-                    camera.getY());*/
+            camera.setPosition(
+                    camera.getX(),
+                    camera.getY()+0.1f);
             GLFW.glfwSwapBuffers(window);
             GLFW.glfwPollEvents();
         }
     }
 
     public void inicializarRecursos() {
+
+        fpsCounter=new FpsCounter();
+
 
         Shader shader = new Shader(
                 "/shaders/vertex.glsl",
@@ -88,7 +97,7 @@ public class Main {
         listaSprites.add(player);
         tileRegistry = new TileRegistry();
 
-        camera = new Camera(0, 0);
+        camera = new Camera(0, 0,800,600);
         renderer = new Renderer(shader, 800, 600, camera);
 
         Tileset tileset = new Tileset(texture, 32, 32);
