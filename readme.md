@@ -197,4 +197,4 @@ Entre las próximas funcionalidades se encuentran:
 
 ## Licencia
 
-Proyecto experimental y educativo. La licencia se definirá en una versión posterior.
+Si llegaste hasta aca felicitaciones ?) es de libre uso.
