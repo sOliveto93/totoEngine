@@ -40,13 +40,13 @@ El pipeline básico de renderizado 2D se encuentra funcionando y el motor ya cue
 ## Sistema de mapas
 
 Los mapas pueden dividirse actualmente en diferentes capas de renderizado:
-
+```text
 Map
  ├── Terrain
  ├── Buildings
  ├── Decoration
  └── Foreground
-
+```
 Cada layer almacena los IDs de los tiles que lo componen.
 
 Los mapas se cargan mediante MapLoader desde archivos externos, permitiendo separar los datos del mapa del código del motor.
