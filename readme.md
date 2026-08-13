@@ -57,14 +57,14 @@ Los mapas se cargan mediante MapLoader desde archivos externos, permitiendo sepa
 El motor utiliza un TextureManager para evitar cargar repetidamente la misma textura.
 
 Los tiles se definen mediante un registro externo:
-
+```text
 GRASS=1,/textures/terrain.png,0,0
 WATER=2,/textures/terrain.png,0,7
 WALL=3,/textures/terrain.png,0,14
 
 TREE=4,/textures/decorations/decorations.png,10,0
 FLOWER=5,/textures/decorations/decorations.png,11,0
-
+```
 De esta forma, el mapa trabaja con IDs mientras que el TileRegistry se encarga de asociar cada ID con su correspondiente Tile.
 
 ## Pipeline de renderizado
