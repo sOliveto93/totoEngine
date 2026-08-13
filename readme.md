@@ -6,28 +6,66 @@ El proyecto nace como una implementación experimental para comprender cómo fun
 
 ## Estado del proyecto
 
-**Versión actual: v0.1.0**
+Versión actual: v0.2
 
-El pipeline básico de renderizado 2D ya se encuentra funcionando.
+El pipeline básico de renderizado 2D se encuentra funcionando y el motor ya cuenta con un sistema básico de mapas por capas y carga de recursos.
 
 ## Características actuales
 
 * Renderizado 2D mediante OpenGL
-* Gestión de `VAO`, `VBO` y `EBO`
+* Gestión de VAO, VBO y EBO
 * Shaders de vértices y fragmentos
-* Texturas
-* `TextureRegion` para trabajar con regiones de una textura
-* Tilesets
+* Gestión de texturas
+* TextureRegion para trabajar con regiones de una textura
+* TextureManager para reutilizar texturas cargadas
+* Tileset
+* TileRegistry
+* Carga de registros de tiles desde archivos
 * Tilemaps
+* Mapas compuestos por múltiples layers
+* MapLoader
 * Sprites
+* Sprites animados
+* Sistema básico de animaciones
 * Cámara 2D
 * Culling básico de tiles fuera de la pantalla
 * Batch rendering
 * Batching por textura
-* Sistema de `flush()` para controlar el tamaño de los batches
-* Geometría reutilizable mediante `Quad`
+* Sistema de flush() para controlar el tamaño de los batches
+* Geometría reutilizable mediante Quad
 * Mesh persistente entre frames
 * Soporte para múltiples texturas dentro del mismo renderizado
+
+
+## Sistema de mapas
+
+Los mapas pueden dividirse actualmente en diferentes capas de renderizado:
+
+Map
+ ├── Terrain
+ ├── Buildings
+ ├── Decoration
+ └── Foreground
+
+Cada layer almacena los IDs de los tiles que lo componen.
+
+Los mapas se cargan mediante MapLoader desde archivos externos, permitiendo separar los datos del mapa del código del motor.
+
+
+## Gestión de recursos
+
+El motor utiliza un TextureManager para evitar cargar repetidamente la misma textura.
+
+Los tiles se definen mediante un registro externo:
+
+GRASS=1,/textures/terrain.png,0,0
+WATER=2,/textures/terrain.png,0,7
+WALL=3,/textures/terrain.png,0,14
+
+TREE=4,/textures/decorations/decorations.png,10,0
+FLOWER=5,/textures/decorations/decorations.png,11,0
+
+De esta forma, el mapa trabaja con IDs mientras que el TileRegistry se encarga de asociar cada ID con su correspondiente Tile.
 
 ## Pipeline de renderizado
 
@@ -82,17 +120,16 @@ El proyecto se encuentra en desarrollo y muchas funcionalidades todavía están 
 
 Entre las próximas funcionalidades se encuentran:
 
-* Animaciones de sprites
-* Transformaciones
-* Layers de renderizado
-* Mejoras en el sistema de cámara
 * Sistema de entidades
-* Colisiones
+* Sistema de colisiones
+* Mejoras en el sistema de cámara
+* Transformaciones
 * Gestión de escenas
 * Input
 * Mejoras de rendimiento
 * Audio
-* Más herramientas para desarrollo de juegos
+* Herramientas para desarrollo de juegos
+* Integración con herramientas externas de edición de mapas
 
 ## Licencia
 
