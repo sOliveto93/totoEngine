@@ -6,7 +6,7 @@ El proyecto nace como una implementación experimental para comprender cómo fun
 
 ## Estado del proyecto
 
-**Versión actual: v0.2**
+**Versión actual: v0.3**
 
 El pipeline básico de renderizado 2D se encuentra funcionando. El motor cuenta con un sistema básico de mapas por capas, gestión de recursos, sprites y animaciones, y una arquitectura inicial basada en **entidades, componentes y sistemas**.
 
