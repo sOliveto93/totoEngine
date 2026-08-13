@@ -126,33 +126,29 @@ El flujo actual del motor es aproximadamente:
 ```text
 Entity / Tile
       │
-      ├── Transform
-      ├── Sprite
-      └── Animation
-             │
-             ▼
-        TextureRegion
-             │
-             ▼
-         Renderer
-             │
-             ▼
-       BatchRenderer
-             │
-             ▼
-         Quad / Mesh
-             │
-             ▼
-        VAO / VBO / EBO
-             │
-             ▼
-          Shader
-             │
-             ▼
-          OpenGL
-             │
-             ▼
-           GPU
+      ▼
+TextureRegion
+      │
+      ▼
+Renderer
+      │
+      ▼
+BatchRenderer
+      │
+      ▼
+Quad / Mesh
+      │
+      ▼
+VAO / VBO / EBO
+      │
+      ▼
+Shader
+      │
+      ▼
+OpenGL
+      │
+      ▼
+GPU
 ```
 
 El `BatchRenderer` permite agrupar múltiples objetos antes de enviarlos a la GPU, realizando un `flush()` cuando cambia la textura utilizada o cuando se alcanza el tamaño máximo del batch.
