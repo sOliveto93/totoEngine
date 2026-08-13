@@ -9,6 +9,7 @@ import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 
 import com.engine.component.Transform;
+import com.engine.component.Velocity;
 import com.engine.debug.FpsCounter;
 import com.engine.entity.Entity;
 import com.engine.graphics.Camera;
@@ -16,7 +17,11 @@ import com.engine.graphics.Renderer;
 import com.engine.graphics.Shader;
 import com.engine.graphics.Texture;
 import com.engine.graphics.TextureRegion;
+import com.engine.input.Controller;
+import com.engine.input.Input;
 import com.engine.system.AnimationSystem;
+import com.engine.system.InputSystem;
+import com.engine.system.MovementSystem;
 import com.engine.world.Animation;
 import com.engine.world.Map;
 import com.engine.world.MapLoader;
@@ -43,6 +48,10 @@ public class Main {
     private List<Entity> entities;
     private Shader shader;
     AnimationSystem animationSystem;
+    InputSystem inputSystem;
+    MovementSystem movementSystem;
+    Controller controller;
+    Input input;
 
     public void initOpenGL() {
 
@@ -57,6 +66,20 @@ public class Main {
         }
 
         GLFW.glfwMakeContextCurrent(window);
+
+        /* INPUT */
+
+        input = new Input();
+
+        GLFW.glfwSetKeyCallback(window, (window, key, scancode, action, mods) -> {
+            if (action == GLFW.GLFW_PRESS) {
+                input.setKey(key, true);
+            }
+            if (action == GLFW.GLFW_RELEASE) {
+                input.setKey(key, false);
+            }
+        });
+        /*-------------------------------- */
 
         GL.createCapabilities();
         // VSync OFF
@@ -83,10 +106,12 @@ public class Main {
 
             fpsCounter.update();
 
+            GLFW.glfwPollEvents();
+
             // update para animaciones ira por aca en un futuro y las fisicas etc
-            
+            inputSystem.update();
+            movementSystem.update(world, deltaTime);
             animationSystem.update(world, deltaTime);
-            
 
             GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
             renderer.draw(
@@ -95,22 +120,30 @@ public class Main {
                     camera.getX(),
                     camera.getY());
             GLFW.glfwSwapBuffers(window);
-            GLFW.glfwPollEvents();
+            
         }
     }
 
     public void createGame() {
-
         fpsCounter = new FpsCounter();
+
         entities = new ArrayList<>();
-        animationSystem= new AnimationSystem();
+
+        controller=new Controller();
+
+        inputSystem=new InputSystem(input,controller);
+
+        movementSystem=new MovementSystem();
+
+        animationSystem = new AnimationSystem();
+
         createGraphics();
 
         loadResources();
 
         createMap();
 
-        createSprites();
+        createPlayer();
 
         renderer = new Renderer(
                 shader,
@@ -130,7 +163,7 @@ public class Main {
 
     }
 
-    public void createSprites() {
+    public void createPlayer() {
         Texture cat = new Texture(
                 "/sprites/animal/Cat 01-1.png");
 
@@ -139,13 +172,16 @@ public class Main {
         Animation animation = new Animation(frames, 0.5f);
         Transform transform = new Transform(100, 100);
         Sprite sprite = new Sprite(frames[0]);
+        Velocity velocity=new Velocity(100.0f);
         Entity entity = new Entity();
+
         entity.addComponent(sprite);
         entity.addComponent(transform);
         entity.addComponent(animation);
+        entity.addComponent(velocity);
 
         entities.add(entity);
-
+        controller.setControlledEntity(entity); 
     }
 
     public void loadResources() {
