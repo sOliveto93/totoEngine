@@ -15,7 +15,7 @@ No estoy intentando reemplazar Unity ni hacer un engine gigante. La idea es pode
 
 **Versión actual: v0.3**
 
-Ya tengo funcionando el pipeline básico de renderizado, mapas por capas, texturas, sprites y animaciones. Ahora estoy empezando a pasar la arquitectura a Entity + Component + System**.
+Ya tengo funcionando el pipeline básico de renderizado, mapas por capas, texturas, sprites y animaciones. Ahora estoy empezando a pasar la arquitectura a Entity + Component + System y ya cuenta con sistemas independientes para animaciones y movimiento.
 
 El proyecto continúa en desarrollo y actualmente se encuentra enfocado en construir una base general para juegos 2D.
 
@@ -49,6 +49,11 @@ El proyecto continúa en desarrollo y actualmente se encuentra enfocado en const
 * `Transform` como componente
 * Componentes almacenados por tipo
 * Sistemas independientes de las entidades
+* Sistema de input basado en estados
+* `InputSystem`
+* `Controller` para definir qué entidad controla el jugador
+* `Velocity` como componente
+* `MovementSystem`
 
 
 ### Evolución de la arquitectura
@@ -56,7 +61,7 @@ El proyecto continúa en desarrollo y actualmente se encuentra enfocado en const
 Al principio tenía clases como Player y AnimatedSprite. Mientras el motor crecía me di cuenta de que esto me iba a llevar a crear una clase para cada tipo de objeto. Por eso cambié el diseño a Entity + Component + System.
 
 Actualmente una entidad puede construirse combinando componentes como
-`Transform`, `Sprite` y `Animation`. Esto permite que el mismo sistema pueda
+`Transform`, `Sprite` , `Animation`, etc. Esto permite que el mismo sistema pueda
 utilizarse para jugadores, NPCs, enemigos, objetos u otras entidades sin
 necesitar una clase específica para cada tipo.
 
@@ -71,13 +76,15 @@ Una entidad puede estar formada por diferentes componentes:
 
 ```text
 Entity
-   │
-   ├── Transform
-   ├── Sprite
-   └── Animation
-          │
-          ▼
-   AnimationSystem
+ ├── Transform
+ ├── Sprite
+ ├── Velocity
+ └── Animation
+
+       │
+       ├──────────► AnimationSystem
+       │
+       └──────────► MovementSystem
 ```
 
 Esta arquitectura permitirá incorporar posteriormente sistemas de física, colisiones, input y otros comportamientos sin acoplarlos directamente al renderer.
@@ -122,32 +129,55 @@ El flujo actual del motor es aproximadamente:
 ```text
 Entity
  ├── Transform
- ├── Sprite
- └── Animation
-        │
-        ▼
-   TextureRegion
-
-Tile
-   │
-   ▼
-TextureRegion
-
-        ↓
-     Renderer
-        ↓
-   BatchRenderer
-        ↓
-     Quad / Mesh
-        ↓
-   VAO / VBO / EBO
-        ↓
-      Shader
-        ↓
-     OpenGL
-        ↓
-       GPU
+ ├── Sprite ──► TextureRegion ──┐
+ └── Animation ──► Frame ───────┤
+                                │
+Tile ──► TextureRegion ─────────┤
+                                ▼
+                             Renderer
+                                │
+                                ▼
+                          BatchRenderer
+                                │
+                                ▼
+                            Quad / Mesh
+                                │
+                                ▼
+                           VAO / VBO / EBO
+                                │
+                                ▼
+                             Shader
+                                │
+                                ▼
+                             OpenGL
+                                │
+                                ▼
+                              GPU
 ```
+
+##Input y Movimiento
+
+El Input mantiene el estado de las teclas. InputSystem transforma ese estado en una velocidad para la entidad controlada. Después MovementSystem aplica esa velocidad al Transform.
+
+```text
+Input
+  │
+  ▼
+InputSystem
+  │
+  ▼
+Velocity
+  │
+  ▼
+MovementSystem
+  │
+  ▼
+Transform
+  │
+  ▼
+Renderer
+```
+
 
 El `BatchRenderer` permite agrupar múltiples objetos antes de enviarlos a la GPU, realizando un `flush()` cuando cambia la textura utilizada o cuando se alcanza el tamaño máximo del batch.
 
@@ -168,7 +198,6 @@ Entre las próximas funcionalidades se encuentran:
 * Sistema de colisiones
 * Componentes y sistemas adicionales
 * Mejoras en el sistema de cámara
-* Input
 * Gestión de escenas
 * Gestión de ciclo de vida de entidades
 * Culling y particionado espacial
