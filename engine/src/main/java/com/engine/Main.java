@@ -1,5 +1,6 @@
 package com.engine;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,25 +16,33 @@ import com.engine.graphics.Texture;
 import com.engine.graphics.TextureRegion;
 import com.engine.world.AnimatedSprite;
 import com.engine.world.Animation;
+import com.engine.world.Map;
+import com.engine.world.MapLoader;
+import com.engine.world.World;
 import com.engine.world.Sprite;
 import com.engine.world.SpriteSheet;
-import com.engine.world.TileMap;
+import com.engine.world.TextureManager;
+import com.engine.world.TileRegisterLoader;
 import com.engine.world.TileRegistry;
-import com.engine.world.Tileset;
 
 public class Main {
     private static long window;
 
     private Renderer renderer;
-    private TileMap tileMap;
-    private TileRegistry tileRegistry;
-    Camera camera;
-    List<Sprite> listaSprites;
+
+    private Camera camera;
+
     private FpsCounter fpsCounter;
     private long lastTime;
-    AnimatedSprite player;
+    private AnimatedSprite player;
 
-    public void inicializarOpenGL() {
+    private World world;
+    private Map map;
+    private TileRegistry tileRegistry;
+    private List<Sprite> listaSprites;
+    private Shader shader;
+
+    public void initOpenGL() {
 
         if (!GLFW.glfwInit()) {
             throw new IllegalStateException("No se pudo inicializar GLFW");
@@ -50,9 +59,15 @@ public class Main {
         GL.createCapabilities();
         // VSync OFF
         GLFW.glfwSwapInterval(0);
+
+        // Transparencias
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(
+                GL11.GL_SRC_ALPHA,
+                GL11.GL_ONE_MINUS_SRC_ALPHA);
     }
 
-    public void iniciarLoop() {
+    public void run() {
 
         lastTime = System.nanoTime();
 
@@ -71,7 +86,7 @@ public class Main {
 
             GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
             renderer.draw(
-                    tileMap, tileRegistry, listaSprites);
+                    world);
             camera.setPosition(
                     camera.getX(),
                     camera.getY());
@@ -80,24 +95,44 @@ public class Main {
         }
     }
 
-    public void inicializarRecursos() {
+    public void createGame() {
 
         fpsCounter = new FpsCounter();
 
-        incializarGraficos();
-        inicializarMundo();
-        inicializarSprites();
+        createGraphics();
+
+        loadResources();
+
+        createMap();
+
+        createSprites();
+
+        renderer = new Renderer(
+                shader,
+                800,
+                600,
+                camera,
+                tileRegistry);
+
+        createWorld();
+    }
+
+    public void createWorld() {
+
+        world = new World(
+                map,
+                listaSprites);
 
     }
 
-    public void inicializarSprites() {
+    public void createSprites() {
         Texture cat = new Texture(
-                "/textures/Animal/Cat 01-1.png");
+                "/sprites/animal/Cat 01-1.png");
 
-        SpriteSheet playerSheet=new SpriteSheet(cat, 32, 32);
-        TextureRegion[] frames = { playerSheet.getFrame(0 ,0),playerSheet.getFrame(1 , 0),playerSheet.getFrame(2 , 0) };
-        Animation animation=new Animation(frames, 0.5f);
-        
+        SpriteSheet playerSheet = new SpriteSheet(cat, 32, 32);
+        TextureRegion[] frames = { playerSheet.getFrame(0, 0), playerSheet.getFrame(1, 0), playerSheet.getFrame(2, 0) };
+        Animation animation = new Animation(frames, 0.5f);
+
         player = new AnimatedSprite(
                 animation,
                 100,
@@ -108,25 +143,33 @@ public class Main {
 
     }
 
-    public void inicializarMundo() {
+    public void loadResources() {
 
-        Texture texture = new Texture(
-                "/textures/tileset.png");
+        TextureManager textureManager = new TextureManager();
 
-        tileRegistry = new TileRegistry();
+        TileRegisterLoader tileLoader = new TileRegisterLoader(textureManager);
 
-        Tileset tileset = new Tileset(texture, 32, 32);
-        tileRegistry.register(0, tileset.getTile(0, 3));
-        tileRegistry.register(1, tileset.getTile(1, 0));
-        tileRegistry.register(2, tileset.getTile(2, 0));
-        tileRegistry.register(3, tileset.getTile(10, 0));
-
-        tileMap = new TileMap();
+        try {
+            tileRegistry = tileLoader.load("/tilesRegister/tiles.txt");
+        } catch (IOException e) {
+            throw new RuntimeException(
+                    "No se pudo cargar el registro de tiles", e);
+        }
 
     }
 
-    public void incializarGraficos() {
-        Shader shader = new Shader(
+    public void createMap() {
+        MapLoader mapLoader = new MapLoader();
+        try {
+            map = mapLoader.load("/maps/map01.txt");
+        } catch (IOException e) {
+            throw new RuntimeException("No se pudo cargar el mapa", e);
+        }
+
+    }
+
+    public void createGraphics() {
+        shader = new Shader(
                 "/shaders/vertex.glsl",
                 "/shaders/fragment.glsl");
 
@@ -135,11 +178,11 @@ public class Main {
         shader.use();
         shader.setUniform("textureSampler", 0);
 
-        camera = new Camera(0, 0, 800, 600);
-        renderer = new Renderer(shader, 800, 600, camera);
+        camera = new Camera(0, 0, 200, 600);
+
     }
 
-    public void cerrar() {
+    public void close() {
         GLFW.glfwDestroyWindow(window);
         GLFW.glfwTerminate();
     }
@@ -147,11 +190,11 @@ public class Main {
     public static void main(String[] args) {
 
         Main main = new Main();
-        main.inicializarOpenGL();
-        main.inicializarRecursos();
+        main.initOpenGL();
+        main.createGame();
 
-        main.iniciarLoop();
-        main.cerrar();
+        main.run();
+        main.close();
 
     }
 }

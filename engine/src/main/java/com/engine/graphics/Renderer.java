@@ -2,9 +2,11 @@ package com.engine.graphics;
 
 import java.util.List;
 
+import com.engine.world.Map;
+import com.engine.world.World;
 import com.engine.world.Sprite;
 import com.engine.world.Tile;
-import com.engine.world.TileMap;
+import com.engine.world.TileLayer;
 import com.engine.world.TileRegistry;
 
 public class Renderer {
@@ -17,68 +19,82 @@ public class Renderer {
 
         private int screenWidth;
         private int screenHeight;
+        private TileRegistry tileRegistry;
 
         public Renderer(Shader shader, int screenWidth,
-                        int screenHeight, Camera camera) {
+                        int screenHeight, Camera camera, TileRegistry registry) {
                 this.shader = shader;
 
                 this.screenWidth = screenWidth;
                 this.screenHeight = screenHeight;
 
                 this.camera = camera;
-
+                this.tileRegistry = registry;
                 this.batch = new BatchRenderer();
 
         }
 
-        public void draw(TileMap tileMap, TileRegistry registry, List<Sprite> lista) {
+        public void draw(World gameWorld) {
+
+                Map map = gameWorld.getMap();
+                TileLayer terrain = map.getTerrain();
+                List<Sprite> lista = gameWorld.getSprites();
 
                 batch.clear();
-//culling
-                Tile firstTile = registry.get(tileMap.getId(0, 0));
+
+                // Culling basado en el tamaño del tile
+                Tile firstTile = tileRegistry.get(terrain.getId(0, 0));
+
                 int tileWidth = firstTile.getRegion().getWidth();
                 int tileHeight = firstTile.getRegion().getHeight();
 
                 int startX = (int) (camera.getX() / tileWidth);
                 int startY = (int) (camera.getY() / tileHeight);
-                
-                int endX = (int) Math.ceil((camera.getX() + camera.getWidth()) / tileWidth);
-                int endY = (int) Math.ceil((camera.getY() + camera.getHeight()) / tileHeight);
+
+                int endX = (int) Math.ceil(
+                                (camera.getX() + camera.getWidth()) / tileWidth);
+
+                int endY = (int) Math.ceil(
+                                (camera.getY() + camera.getHeight()) / tileHeight);
 
                 startX = Math.max(0, startX);
                 startY = Math.max(0, startY);
-                endX = Math.min(tileMap.getWidth(), endX);
-                endY = Math.min(tileMap.getHeight(), endY);
 
-                for (int y = startY; y < endY; y++) {
-                        for (int x = startX; x < endX; x++) {
+                endX = Math.min(terrain.getWidth(), endX);
+                endY = Math.min(terrain.getHeight(), endY);
 
-                                int id = tileMap.getId(x, y);
-                                Tile tile = registry.get(id);
-                                TextureRegion region = tile.getRegion();
-                                // esquina superior izquierda del tile
-                                float pixelX = x * region.getWidth();
+                // Capas
+                drawLayer(
+                                map.getTerrain(),
+                                startX,
+                                startY,
+                                endX,
+                                endY);
 
-                                float pixelY = y * region.getHeight();
+                drawLayer(
+                                map.getBuildings(),
+                                startX,
+                                startY,
+                                endX,
+                                endY);
 
-                                // camara
-                                pixelX -= camera.getX();
+                drawLayer(
+                                map.getDecoration(),
+                                startX,
+                                startY,
+                                endX,
+                                endY);
 
-                                pixelY -= camera.getY();
+                drawLayer(
+                                map.getForeground(),
+                                startX,
+                                startY,
+                                endX,
+                                endY);
 
-                                // opengl
-                                float posX = (pixelX / screenWidth) * 2f - 1f;
-
-                                float posY = 1f - (pixelY / screenHeight) * 2f;
-
-                                float scaleX = (region.getWidth() / (float) screenWidth) * 2f;
-
-                                float scaleY = (region.getHeight() / (float) screenHeight) * 2f;
-
-                                batch.add(region, posX, posY, scaleX, scaleY);
-                        }
-                }
+                // Sprites
                 if (!lista.isEmpty()) {
+
                         for (Sprite sprite : lista) {
 
                                 TextureRegion region = sprite.getRegion();
@@ -102,8 +118,57 @@ public class Renderer {
                                                 scaleY);
                         }
                 }
+
                 shader.use();
 
                 batch.flush();
+        }
+
+        private void drawLayer(
+                        TileLayer layer,
+                        int startX,
+                        int startY,
+                        int endX,
+                        int endY) {
+
+                for (int y = startY; y < endY; y++) {
+
+                        for (int x = startX; x < endX; x++) {
+
+                                int id = layer.getId(x, y);
+
+                                Tile tile = tileRegistry.get(id);
+
+                                if (tile == null) {
+                                        continue;
+                                }
+
+                                drawTile(tile, x, y);
+                        }
+                }
+        }
+
+        private void drawTile(Tile tile, int x, int y) {
+
+                TextureRegion region = tile.getRegion();
+
+                float pixelX = x * region.getWidth() - camera.getX();
+
+                float pixelY = y * region.getHeight() - camera.getY();
+
+                float posX = (pixelX / screenWidth) * 2f - 1f;
+
+                float posY = 1f - (pixelY / screenHeight) * 2f;
+
+                float scaleX = (region.getWidth() / (float) screenWidth) * 2f;
+
+                float scaleY = (region.getHeight() / (float) screenHeight) * 2f;
+
+                batch.add(
+                                region,
+                                posX,
+                                posY,
+                                scaleX,
+                                scaleY);
         }
 }

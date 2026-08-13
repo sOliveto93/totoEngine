@@ -15,8 +15,7 @@ public class AnimatedSprite extends Sprite{
     public void update(float deltaTime){
 
         animation.update(deltaTime);
-        
-
+    
     }
 
     @Override
