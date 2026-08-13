@@ -1,8 +1,9 @@
 package com.engine.world;
 
+import com.engine.component.Component;
 import com.engine.graphics.TextureRegion;
 
-public class Animation {
+public class Animation  implements Component{
 TextureRegion[] frames;
     private int currentFrame;
     private float timer;

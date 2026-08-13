@@ -2,6 +2,9 @@ package com.engine.graphics;
 
 import java.util.List;
 
+import com.engine.component.Transform;
+import com.engine.entity.Entity;
+import com.engine.world.Animation;
 import com.engine.world.Map;
 import com.engine.world.World;
 import com.engine.world.Sprite;
@@ -38,7 +41,7 @@ public class Renderer {
 
                 Map map = gameWorld.getMap();
                 TileLayer terrain = map.getTerrain();
-                List<Sprite> lista = gameWorld.getSprites();
+                List<Entity> entities = gameWorld.getEntities();
 
                 batch.clear();
 
@@ -93,14 +96,30 @@ public class Renderer {
                                 endY);
 
                 // Sprites
-                if (!lista.isEmpty()) {
+                if (!entities.isEmpty()) {
 
-                        for (Sprite sprite : lista) {
+                        for (Entity entity : entities) {
+
+                                Sprite sprite = entity.getComponent(Sprite.class);
 
                                 TextureRegion region = sprite.getRegion();
+                                
+                                Transform transform = entity.getComponent(Transform.class);
 
-                                float pixelX = sprite.getX() - camera.getX();
-                                float pixelY = sprite.getY() - camera.getY();
+                                if (sprite == null || transform == null) {
+                                        continue;
+                                }
+
+                                Animation animation = entity.getComponent(Animation.class);
+
+                                
+
+                                if (animation != null) {
+                                        region = animation.getCurrentFrame();
+                                }
+
+                                float pixelX = transform.getX() - camera.getX();
+                                float pixelY = transform.getY() - camera.getY();
 
                                 float posX = (pixelX / screenWidth) * 2f - 1f;
 

@@ -8,13 +8,15 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 
+import com.engine.component.Transform;
 import com.engine.debug.FpsCounter;
+import com.engine.entity.Entity;
 import com.engine.graphics.Camera;
 import com.engine.graphics.Renderer;
 import com.engine.graphics.Shader;
 import com.engine.graphics.Texture;
 import com.engine.graphics.TextureRegion;
-import com.engine.world.AnimatedSprite;
+import com.engine.system.AnimationSystem;
 import com.engine.world.Animation;
 import com.engine.world.Map;
 import com.engine.world.MapLoader;
@@ -34,13 +36,13 @@ public class Main {
 
     private FpsCounter fpsCounter;
     private long lastTime;
-    private AnimatedSprite player;
 
     private World world;
     private Map map;
     private TileRegistry tileRegistry;
-    private List<Sprite> listaSprites;
+    private List<Entity> entities;
     private Shader shader;
+    AnimationSystem animationSystem;
 
     public void initOpenGL() {
 
@@ -82,7 +84,9 @@ public class Main {
             fpsCounter.update();
 
             // update para animaciones ira por aca en un futuro y las fisicas etc
-            player.update(deltaTime);
+            
+            animationSystem.update(world, deltaTime);
+            
 
             GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
             renderer.draw(
@@ -98,7 +102,8 @@ public class Main {
     public void createGame() {
 
         fpsCounter = new FpsCounter();
-
+        entities = new ArrayList<>();
+        animationSystem= new AnimationSystem();
         createGraphics();
 
         loadResources();
@@ -121,7 +126,7 @@ public class Main {
 
         world = new World(
                 map,
-                listaSprites);
+                entities);
 
     }
 
@@ -132,14 +137,14 @@ public class Main {
         SpriteSheet playerSheet = new SpriteSheet(cat, 32, 32);
         TextureRegion[] frames = { playerSheet.getFrame(0, 0), playerSheet.getFrame(1, 0), playerSheet.getFrame(2, 0) };
         Animation animation = new Animation(frames, 0.5f);
+        Transform transform = new Transform(100, 100);
+        Sprite sprite = new Sprite(frames[0]);
+        Entity entity = new Entity();
+        entity.addComponent(sprite);
+        entity.addComponent(transform);
+        entity.addComponent(animation);
 
-        player = new AnimatedSprite(
-                animation,
-                100,
-                100);
-
-        listaSprites = new ArrayList<>();
-        listaSprites.add(player);
+        entities.add(entity);
 
     }
 

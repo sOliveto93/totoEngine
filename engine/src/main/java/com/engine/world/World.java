@@ -2,21 +2,23 @@ package com.engine.world;
 
 import java.util.List;
 
+import com.engine.entity.Entity;
+
 public class World {
 
     private Map map;
-    private List<Sprite> sprites;
+    private List<Entity> entities;
 
-    public World(Map map, List<Sprite> sprites) {
+    public World(Map map, List<Entity> entities) {
         this.map = map;
-        this.sprites = sprites;
+        this.entities = entities;
     }
 
     public Map getMap() {
         return map;
     }
 
-    public List<Sprite> getSprites() {
-        return sprites;
+    public List<Entity> getEntities() {
+        return entities;
     }
 }
