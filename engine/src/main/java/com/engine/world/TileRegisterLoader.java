@@ -11,7 +11,6 @@ import java.util.List;
 import com.engine.graphics.Texture;
 
 public class TileRegisterLoader {
-
     private TextureManager textureManager;
     private Map<String, Tileset> tilesets = new HashMap<>();
 
@@ -77,5 +76,4 @@ public class TileRegisterLoader {
 
         return registry;
     }
-
 }

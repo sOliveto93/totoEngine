@@ -35,6 +35,7 @@ import com.engine.world.World;
 import com.engine.world.Sprite;
 import com.engine.world.SpriteSheet;
 import com.engine.world.TextureManager;
+import com.engine.world.TileLayer;
 import com.engine.world.TileRegisterLoader;
 import com.engine.world.TileRegistry;
 
@@ -121,7 +122,7 @@ public class Main {
             /*--------------------------------------------- */
 
             inputSystem.update(world);
-            physicsSystem.update(world,deltaTime);
+            physicsSystem.update(world, deltaTime);
             movementSystem.update(world, deltaTime);
             collisionSystem.update(world);
             animationSystem.update(world, deltaTime);
@@ -151,7 +152,7 @@ public class Main {
         movementSystem = new MovementSystem(collisionSystem);
 
         animationSystem = new AnimationSystem();
-        physicsSystem= new PhysicsSystem();
+        physicsSystem = new PhysicsSystem();
         createGraphics();
 
         loadResources();
@@ -182,17 +183,18 @@ public class Main {
 
     public void createPlayer() {
         Texture cat = new Texture(
-                "/sprites/animal/Cat 01-1.png");
+
+                "/textures/character/animal/Cat 01-1.png");
 
         SpriteSheet playerSheet = new SpriteSheet(cat, 32, 32);
         TextureRegion[] frames = { playerSheet.getFrame(0, 0), playerSheet.getFrame(1, 0), playerSheet.getFrame(2, 0) };
         Animation animation = new Animation(frames, 0.5f);
         Transform transform = new Transform(100, 100);
         Sprite sprite = new Sprite(frames[0]);
-        PhysicsBody body = new PhysicsBody(1.0f,100.0f);
+        PhysicsBody body = new PhysicsBody(1.0f, 100.0f);
         Collider collider = new Collider(32, 32, 0, 0);
-        Tag playerComponent=new Tag("player");
-        InputController inputController=new InputController();
+        Tag playerComponent = new Tag("player");
+        InputController inputController = new InputController();
         Entity entity = new Entity();
 
         entity.addComponent(sprite);
@@ -201,14 +203,14 @@ public class Main {
         entity.addComponent(body);
         entity.addComponent(collider);
         entity.addComponent(playerComponent);
-entity.addComponent(inputController);
+        entity.addComponent(inputController);
         entities.add(entity);
 
     }
 
     public void createEnemy() {
         Texture cat = new Texture(
-                "/sprites/animal/Cat 01-2.png");
+                "/textures/character/animal/Cat 01-2.png");
 
         SpriteSheet playerSheet = new SpriteSheet(cat, 32, 32);
         TextureRegion[] frames = { playerSheet.getFrame(0, 0), playerSheet.getFrame(1, 0), playerSheet.getFrame(2, 0) };
@@ -217,7 +219,7 @@ entity.addComponent(inputController);
         Sprite sprite = new Sprite(frames[0]);
         Collider collider = new Collider(32, 32, 0, 0);
         Tag tag = new Tag("enemigo");
-        
+
         Entity entity = new Entity();
 
         entity.addComponent(sprite);
@@ -225,7 +227,6 @@ entity.addComponent(inputController);
         entity.addComponent(animation);
         entity.addComponent(collider);
         entity.addComponent(tag);
-        
 
         entities.add(entity);
     }
@@ -246,9 +247,10 @@ entity.addComponent(inputController);
     }
 
     public void createMap() {
+
         MapLoader mapLoader = new MapLoader();
         try {
-            map = mapLoader.load("/maps/map01.txt",32,32);
+            map = mapLoader.load("/maps/map01.txt", 32, 32);
         } catch (IOException e) {
             throw new RuntimeException("No se pudo cargar el mapa", e);
         }

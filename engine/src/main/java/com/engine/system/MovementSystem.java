@@ -27,16 +27,24 @@ public class MovementSystem {
             float nextX = transform.getX()
                     + body.getVelocityX() * deltaTime;
 
+            if (!collisionSystem.willCollide(
+                    world,
+                    entity,
+                    nextX,
+                    transform.getY())) {
+
+                transform.setX(nextX);
+            }
+
             float nextY = transform.getY()
                     + body.getVelocityY() * deltaTime;
 
             if (!collisionSystem.willCollide(
                     world,
                     entity,
-                    nextX,
+                    transform.getX(),
                     nextY)) {
 
-                transform.setX(nextX);
                 transform.setY(nextY);
             }
         }

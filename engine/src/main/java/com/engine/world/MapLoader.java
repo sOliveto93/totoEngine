@@ -8,8 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MapLoader {
-
-    public Map load(String path,int tileWidth,int tileHeight) throws IOException {
+    public Map load(String path, int tileWidth, int tileHeight) throws IOException {
 
         List<String> lines;
 
@@ -61,11 +60,11 @@ public class MapLoader {
 
                 case "[COLLISION]":
                     currentLayer = collision;
-                    break;    
+                    break;
 
                 default:
                     List<Integer> row = parseRow(line);
-                    //verificamos diferencias internas del layer
+                    // verificamos diferencias internas del layer
                     if (!currentLayer.isEmpty() &&
                             row.size() != currentLayer.get(0).size()) {
 
@@ -76,7 +75,7 @@ public class MapLoader {
                     currentLayer.add(row);
 
                     break;
-                   
+
             }
         }
 
@@ -98,11 +97,11 @@ public class MapLoader {
                 buildingsLayer,
                 decorationLayer,
                 foregroundLayer,
-                collisionLayer,tileWidth,tileHeight);
+                collisionLayer, tileWidth, tileHeight);
     }
 
     private List<Integer> parseRow(String line) {
-//        para aceptar mas espacios "\\s+"
+        // para aceptar mas espacios "\\s+"
         String[] values = line.split(" ");
 
         List<Integer> row = new ArrayList<>();
