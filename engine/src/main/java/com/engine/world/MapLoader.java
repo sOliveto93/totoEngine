@@ -9,7 +9,7 @@ import java.util.List;
 
 public class MapLoader {
 
-    public Map load(String path) throws IOException {
+    public Map load(String path,int tileWidth,int tileHeight) throws IOException {
 
         List<String> lines;
 
@@ -29,6 +29,7 @@ public class MapLoader {
         List<List<Integer>> buildings = new ArrayList<>();
         List<List<Integer>> decoration = new ArrayList<>();
         List<List<Integer>> foreground = new ArrayList<>();
+        List<List<Integer>> collision = new ArrayList<>();
 
         List<List<Integer>> currentLayer = null;
 
@@ -58,6 +59,10 @@ public class MapLoader {
                     currentLayer = foreground;
                     break;
 
+                case "[COLLISION]":
+                    currentLayer = collision;
+                    break;    
+
                 default:
                     List<Integer> row = parseRow(line);
                     //verificamos diferencias internas del layer
@@ -79,6 +84,7 @@ public class MapLoader {
         TileLayer buildingsLayer = new TileLayer(toArray(buildings));
         TileLayer decorationLayer = new TileLayer(toArray(decoration));
         TileLayer foregroundLayer = new TileLayer(toArray(foreground));
+        TileLayer collisionLayer = new TileLayer(toArray(collision));
 
         int width = terrainLayer.getWidth();
         int height = terrainLayer.getHeight();
@@ -86,15 +92,17 @@ public class MapLoader {
         validateLayer("BUILDINGS", buildingsLayer, width, height);
         validateLayer("DECORATION", decorationLayer, width, height);
         validateLayer("FOREGROUND", foregroundLayer, width, height);
+        validateLayer("COLLISION", collisionLayer, width, height);
         return new Map(
                 terrainLayer,
                 buildingsLayer,
                 decorationLayer,
-                foregroundLayer);
+                foregroundLayer,
+                collisionLayer,tileWidth,tileHeight);
     }
 
     private List<Integer> parseRow(String line) {
-
+//        para aceptar mas espacios "\\s+"
         String[] values = line.split(" ");
 
         List<Integer> row = new ArrayList<>();

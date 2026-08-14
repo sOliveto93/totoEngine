@@ -3,7 +3,6 @@ package com.engine.system;
 import org.lwjgl.glfw.GLFW;
 
 import com.engine.component.InputController;
-import com.engine.component.PhysicsBody;
 import com.engine.entity.Entity;
 import com.engine.input.Input;
 import com.engine.world.World;
@@ -27,6 +26,7 @@ public class InputSystem {
 
             controller.setDirectionX(0);
             controller.setDirectionY(0);
+            
             if (input.isKeyDown(GLFW.GLFW_KEY_W)) {
                 controller.setDirectionY(-1);
             }

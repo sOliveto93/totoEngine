@@ -9,7 +9,9 @@ public class PhysicsSystem {
 
 
     public void update(World world, float deltaTime){
+
         for (Entity entity : world.getEntities()) {
+            
             InputController controller = entity.getComponent(InputController.class);
             PhysicsBody body = entity.getComponent(PhysicsBody.class);
 

@@ -24,11 +24,21 @@ public class MovementSystem {
                 continue;
             }
 
-            transform.setX(
-                    transform.getX() + body.getVelocityX() * deltaTime);
+            float nextX = transform.getX()
+                    + body.getVelocityX() * deltaTime;
 
-            transform.setY(
-                    transform.getY() + body.getVelocityY() * deltaTime);
+            float nextY = transform.getY()
+                    + body.getVelocityY() * deltaTime;
+
+            if (!collisionSystem.willCollide(
+                    world,
+                    entity,
+                    nextX,
+                    nextY)) {
+
+                transform.setX(nextX);
+                transform.setY(nextY);
+            }
         }
 
     }

@@ -1,6 +1,5 @@
 package com.engine.system;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.engine.component.Collider;
@@ -8,6 +7,7 @@ import com.engine.component.Transform;
 import com.engine.entity.Entity;
 import com.engine.event.CollisionEvent;
 import com.engine.event.EventBus;
+import com.engine.world.TileLayer;
 import com.engine.world.World;
 
 public class CollisionSystem {
@@ -15,7 +15,8 @@ public class CollisionSystem {
     private EventBus eventBus;
 
     public CollisionSystem(EventBus eventBus) {
-this.eventBus = eventBus;    }
+        this.eventBus = eventBus;
+    }
 
     // esto a futuro tine que ser optimizado
     public void update(World world) {
@@ -41,8 +42,8 @@ this.eventBus = eventBus;    }
                 }
 
                 if (intersects(transformA, colliderA, transformB, colliderB)) {
-                    //aca averiguamos quien es quien y enviamos un evento distinto al bus?
-                   eventBus.publish(new CollisionEvent(a, b));
+                    // aca averiguamos quien es quien y enviamos un evento distinto al bus?
+                    eventBus.publish(new CollisionEvent(a, b));
 
                 }
             }
@@ -79,6 +80,11 @@ this.eventBus = eventBus;    }
             return false;
         }
 
+        // mapa
+        if (collidesWithMap(world, colliderA, nextX, nextY)) {
+            return true;
+        }
+
         List<Entity> entities = world.getEntities();
 
         for (Entity other : entities) {
@@ -109,5 +115,44 @@ this.eventBus = eventBus;    }
         return false;
     }
 
-    
+    private boolean isSolid(World world, int tileX, int tileY) {
+
+        TileLayer collisionLayer = world.getMap().getCollisionLayer();
+
+        if (tileX < 0 || tileY < 0 || tileX >= collisionLayer.getWidth() || tileY >= collisionLayer.getHeight()) {
+            return true;
+        }
+        return collisionLayer.getId(tileX, tileY) != 0;
+    }
+
+    private boolean collidesWithMap(World world, Collider collider, float x, float y) {
+
+        float left = x + collider.getOffsetX();
+        float right = left + collider.getWidth();
+
+        float top = y + collider.getOffsetY();
+        float bottom = top + collider.getHeight();
+
+        int tileWidth = world.getMap().getTileWidth();
+        int tileHeight = world.getMap().getTileHeight();
+
+        int startX = (int) Math.floor(left / tileWidth);
+        int endX = (int) Math.floor((right - 0.001f) / tileWidth);
+
+        int startY = (int) Math.floor(top / tileHeight);
+        int endY = (int) Math.floor((bottom - 0.001f) / tileHeight);
+
+        for (int tileY = startY; tileY <= endY; tileY++) {
+
+            for (int tileX = startX; tileX <= endX; tileX++) {
+
+                if (isSolid(world, tileX, tileY)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
 }

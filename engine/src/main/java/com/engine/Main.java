@@ -248,7 +248,7 @@ entity.addComponent(inputController);
     public void createMap() {
         MapLoader mapLoader = new MapLoader();
         try {
-            map = mapLoader.load("/maps/map01.txt");
+            map = mapLoader.load("/maps/map01.txt",32,32);
         } catch (IOException e) {
             throw new RuntimeException("No se pudo cargar el mapa", e);
         }
@@ -265,7 +265,7 @@ entity.addComponent(inputController);
         shader.use();
         shader.setUniform("textureSampler", 0);
 
-        camera = new Camera(0, 0, 200, 600);
+        camera = new Camera(0, 0, 800, 600);
 
     }
 
