@@ -8,20 +8,26 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 
+import com.engine.component.Collider;
+import com.engine.component.InputController;
 import com.engine.component.Transform;
-import com.engine.component.Velocity;
+import com.engine.component.PhysicsBody;
+import com.engine.component.Tag;
 import com.engine.debug.FpsCounter;
 import com.engine.entity.Entity;
+import com.engine.event.EventBus;
 import com.engine.graphics.Camera;
 import com.engine.graphics.Renderer;
 import com.engine.graphics.Shader;
 import com.engine.graphics.Texture;
 import com.engine.graphics.TextureRegion;
-import com.engine.input.Controller;
 import com.engine.input.Input;
 import com.engine.system.AnimationSystem;
+import com.engine.system.CollisionResponseSystem;
+import com.engine.system.CollisionSystem;
 import com.engine.system.InputSystem;
 import com.engine.system.MovementSystem;
+import com.engine.system.PhysicsSystem;
 import com.engine.world.Animation;
 import com.engine.world.Map;
 import com.engine.world.MapLoader;
@@ -47,11 +53,14 @@ public class Main {
     private TileRegistry tileRegistry;
     private List<Entity> entities;
     private Shader shader;
-    AnimationSystem animationSystem;
-    InputSystem inputSystem;
-    MovementSystem movementSystem;
-    Controller controller;
-    Input input;
+    private AnimationSystem animationSystem;
+    private InputSystem inputSystem;
+    private MovementSystem movementSystem;
+    private CollisionSystem collisionSystem;
+    private Input input;
+    private EventBus eventBus;
+    private CollisionResponseSystem collisionResponseSystem;
+    private PhysicsSystem physicsSystem;
 
     public void initOpenGL() {
 
@@ -109,10 +118,15 @@ public class Main {
             GLFW.glfwPollEvents();
 
             // update para animaciones ira por aca en un futuro y las fisicas etc
-            inputSystem.update();
+            /*--------------------------------------------- */
+
+            inputSystem.update(world);
+            physicsSystem.update(world,deltaTime);
             movementSystem.update(world, deltaTime);
+            collisionSystem.update(world);
             animationSystem.update(world, deltaTime);
 
+            /*--------------------------------------------- */
             GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
             renderer.draw(
                     world);
@@ -120,7 +134,7 @@ public class Main {
                     camera.getX(),
                     camera.getY());
             GLFW.glfwSwapBuffers(window);
-            
+
         }
     }
 
@@ -129,14 +143,15 @@ public class Main {
 
         entities = new ArrayList<>();
 
-        controller=new Controller();
+        inputSystem = new InputSystem(input);
+        eventBus = new EventBus();
 
-        inputSystem=new InputSystem(input,controller);
-
-        movementSystem=new MovementSystem();
+        collisionSystem = new CollisionSystem(eventBus);
+        collisionResponseSystem = new CollisionResponseSystem(eventBus);
+        movementSystem = new MovementSystem(collisionSystem);
 
         animationSystem = new AnimationSystem();
-
+        physicsSystem= new PhysicsSystem();
         createGraphics();
 
         loadResources();
@@ -144,6 +159,8 @@ public class Main {
         createMap();
 
         createPlayer();
+
+        createEnemy();
 
         renderer = new Renderer(
                 shader,
@@ -172,16 +189,45 @@ public class Main {
         Animation animation = new Animation(frames, 0.5f);
         Transform transform = new Transform(100, 100);
         Sprite sprite = new Sprite(frames[0]);
-        Velocity velocity=new Velocity(100.0f);
+        PhysicsBody body = new PhysicsBody(1.0f,100.0f);
+        Collider collider = new Collider(32, 32, 0, 0);
+        Tag playerComponent=new Tag("player");
+        InputController inputController=new InputController();
         Entity entity = new Entity();
 
         entity.addComponent(sprite);
         entity.addComponent(transform);
         entity.addComponent(animation);
-        entity.addComponent(velocity);
+        entity.addComponent(body);
+        entity.addComponent(collider);
+        entity.addComponent(playerComponent);
+entity.addComponent(inputController);
+        entities.add(entity);
+
+    }
+
+    public void createEnemy() {
+        Texture cat = new Texture(
+                "/sprites/animal/Cat 01-2.png");
+
+        SpriteSheet playerSheet = new SpriteSheet(cat, 32, 32);
+        TextureRegion[] frames = { playerSheet.getFrame(0, 0), playerSheet.getFrame(1, 0), playerSheet.getFrame(2, 0) };
+        Animation animation = new Animation(frames, 0.5f);
+        Transform transform = new Transform(200, 200);
+        Sprite sprite = new Sprite(frames[0]);
+        Collider collider = new Collider(32, 32, 0, 0);
+        Tag tag = new Tag("enemigo");
+        
+        Entity entity = new Entity();
+
+        entity.addComponent(sprite);
+        entity.addComponent(transform);
+        entity.addComponent(animation);
+        entity.addComponent(collider);
+        entity.addComponent(tag);
+        
 
         entities.add(entity);
-        controller.setControlledEntity(entity); 
     }
 
     public void loadResources() {
