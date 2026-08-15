@@ -28,6 +28,7 @@ import com.engine.system.CollisionSystem;
 import com.engine.system.InputSystem;
 import com.engine.system.MovementSystem;
 import com.engine.system.PhysicsSystem;
+import com.engine.system.TriggerResponseSystem;
 import com.engine.world.Animation;
 import com.engine.world.Map;
 import com.engine.world.MapLoader;
@@ -62,6 +63,7 @@ public class Main {
     private EventBus eventBus;
     private CollisionResponseSystem collisionResponseSystem;
     private PhysicsSystem physicsSystem;
+    private TriggerResponseSystem triggerResponseSystem;
 
     public void initOpenGL() {
 
@@ -149,6 +151,7 @@ public class Main {
 
         collisionSystem = new CollisionSystem(eventBus);
         collisionResponseSystem = new CollisionResponseSystem(eventBus);
+        triggerResponseSystem = new TriggerResponseSystem(eventBus);
         movementSystem = new MovementSystem(collisionSystem);
 
         animationSystem = new AnimationSystem();
@@ -162,7 +165,7 @@ public class Main {
         createPlayer();
 
         createEnemy();
-
+        createObjectTrigger();
         renderer = new Renderer(
                 shader,
                 800,
@@ -192,7 +195,7 @@ public class Main {
         Transform transform = new Transform(100, 100);
         Sprite sprite = new Sprite(frames[0]);
         PhysicsBody body = new PhysicsBody(1.0f, 100.0f);
-        Collider collider = new Collider(32, 32, 0, 0);
+        Collider collider = new Collider(32, 32, 0, 0, false);
         Tag playerComponent = new Tag("player");
         InputController inputController = new InputController();
         Entity entity = new Entity();
@@ -217,7 +220,7 @@ public class Main {
         Animation animation = new Animation(frames, 0.5f);
         Transform transform = new Transform(200, 200);
         Sprite sprite = new Sprite(frames[0]);
-        Collider collider = new Collider(32, 32, 0, 0);
+        Collider collider = new Collider(32, 32, 0, 0, false);
         Tag tag = new Tag("enemigo");
 
         Entity entity = new Entity();
@@ -229,6 +232,27 @@ public class Main {
         entity.addComponent(tag);
 
         entities.add(entity);
+    }
+
+    public void createObjectTrigger() {
+        Texture textura = new Texture(
+                "/textures/decorations/decoration.png");
+        SpriteSheet spritesheet = new SpriteSheet(textura, 32, 48);
+        TextureRegion[] frames = {spritesheet.getFrame(1, 2),spritesheet.getFrame(1, 4)};
+        Transform transform = new Transform(100, 200);
+        Sprite sprite = new Sprite(frames[0]);
+        Animation animation=new Animation(frames, 0.01f);
+        Collider collider = new Collider(32, 32, 0, 0, true);
+        Tag tag = new Tag("puerta");
+        Entity entity = new Entity();
+
+        entity.addComponent(sprite);
+        entity.addComponent(transform);
+        entity.addComponent(collider);
+        entity.addComponent(animation);
+        entity.addComponent(tag);
+        entities.add(entity);
+
     }
 
     public void loadResources() {

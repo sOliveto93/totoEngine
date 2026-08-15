@@ -1,8 +1,10 @@
 AIR=0,/textures/terrain/grass.png,20,20
-GRASS=1,/textures/terrain/grass.png,0,0
-WATER=2,/textures/terrain/grass.png,0,3
-WALL=3,/textures/terrain/grass.png,2,14
+GRASS_1=1,/textures/terrain/grass.png,0,0
+GRASS_2=2,/textures/terrain/grass.png,0,3
+ROCK_FLOOR_1=3,/textures/terrain/grass.png,0,4
+ROCK_FLOOR_2=4,/textures/terrain/grass.png,0,5
+ROCK_FLOOR_3=5,/textures/terrain/grass.png,1,4
 
-TREE=4,/textures/decorations/decoration.png,10,0
-FLOWER=5,/textures/decorations/decoration.png,11,0
-ROCK=6,/textures/decorations/decoration.png,5,3
+TREE=100,/textures/decorations/decoration.png,10,0
+FLOWER=200,/textures/decorations/decoration.png,11,0
+ROCK=300,/textures/decorations/decoration.png,5,3

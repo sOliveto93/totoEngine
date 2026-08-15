@@ -7,6 +7,7 @@ import com.engine.component.Transform;
 import com.engine.entity.Entity;
 import com.engine.event.CollisionEvent;
 import com.engine.event.EventBus;
+import com.engine.event.TriggerEvent;
 import com.engine.world.TileLayer;
 import com.engine.world.World;
 
@@ -42,8 +43,13 @@ public class CollisionSystem {
                 }
 
                 if (intersects(transformA, colliderA, transformB, colliderB)) {
-                    // aca averiguamos quien es quien y enviamos un evento distinto al bus?
-                    eventBus.publish(new CollisionEvent(a, b));
+                    if (colliderA.isTrigger() || colliderB.isTrigger()) {
+                        // publicamos triger events
+                        eventBus.publish(new TriggerEvent(a, b));
+                    } else {
+                        // aca averiguamos quien es quien y enviamos un evento distinto al bus?
+                        eventBus.publish(new CollisionEvent(a, b));
+                    }
 
                 }
             }
@@ -79,7 +85,9 @@ public class CollisionSystem {
         if (colliderA == null) {
             return false;
         }
-
+        if (colliderA.isTrigger()) {
+            return false;
+        }
         // mapa
         if (collidesWithMap(world, colliderA, nextX, nextY)) {
             return true;
@@ -97,6 +105,10 @@ public class CollisionSystem {
             Collider colliderB = other.getComponent(Collider.class);
 
             if (transformB == null || colliderB == null) {
+                continue;
+            }
+
+            if (colliderB.isTrigger()) {
                 continue;
             }
 
